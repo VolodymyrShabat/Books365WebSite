@@ -1,0 +1,76 @@
+﻿@model Books365WebSite.Models.Book
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<br />
+<h2 class="text-info">Create new Book</h2>
+<hr>
+
+<form method="post">
+    <div class="card col-12 jumbotron" style="background-image: url('/image.jpg'); background-size: cover">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <input type="hidden" asp-for="Isbn" />
+        <div class="form-group row  m-3">
+            <div class="col-2 offset-1">
+                <label asp-for="Title" class="h3 text-light"></label>
+            </div>
+            <div class="col-6 offset-2">
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row m-3">
+            <div class="col-2 offset-1">
+                <label asp-for="Genre" class="h3 text-light"></label>
+            </div>
+            <div class="col-6 offset-2">
+                <select class="custom-select" id="inputGroupSelect01" asp-for="Genre">
+                    <option selected>Choose...</option>
+                    <option value="Classic">Classic</option>
+                    <option value="Children's">Children's</option>
+                    <option value="Thriller">Thriller</option>
+                    <option value="Romance">Romance</option>
+                    <option value="Sci-Fi">Sci-Fi</option>
+                    <option value="Fantasy">Fantasy</option>
+                    <option value="Fiction">Fiction</option>
+                    <option value="Horror">Horror</option>
+                    <option value="Detective">Detective</option>
+                    <option value="Biography">Biography</option>
+                    <option value="non-Fiction">non-Fiction</option>
+                </select>
+                <span asp-validation-for="Genre" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row m-3">
+            <div class="col-2 offset-1">
+                <label asp-for="Pages" class="h3 text-light"></label>
+            </div>
+            <div class="col-6 offset-2">
+                <input asp-for="Pages" maxlength="20" class="form-control" />
+                <span asp-validation-for="Pages" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="form-group row m-3">
+            <div class="col-2 offset-1">
+                <label asp-for="Author" class="h3 text-light"></label>
+            </div>
+            <div class="col-6 offset-2">
+                <input asp-for="Author" class="form-control" />
+                <span asp-validation-for="Author" class="text-danger"></span>
+            </div>
+        </div>
+        
+        <div class="row  m-3">
+            <div class="col-3 offset-5">
+                <button type="submit" asp-route-id="@Model.Isbn" asp-action="UpdateBook" class="btn btn-info form-control">Submit</button>
+            </div>
+            <div class="col-3">
+                <a asp-action="GetBooks" class="btn btn-danger form-control">Return</a>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts{
+    <partial name="_ValidationScriptsPartial" />
+}

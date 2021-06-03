@@ -1,0 +1,43 @@
+﻿
+
+@model Books365WebSite.ViewModels.RegisterViewModel
+<html>
+
+<head>
+    <link rel="stylesheet" href="~/css/Login.css">
+    <link href="https://fonts.googleapis.com/css?family=Ubuntu" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css">
+    <title>Sign in</title>
+</head>
+
+<body>
+    <div class="main" style="height:auto">
+        <p class="sign" align="center">Register</p>
+        <form class="form1" method="post" asp-controller="Account" asp-action="Register">
+            <div class="validation" asp-validation-summary="ModelOnly"></div>
+            <div class="input-div">
+                <input class="un" placeholder="Email" asp-for="Email" />
+                <span asp-validation-for="Email" class="validation"></span>
+            </div>
+            <div class="input-div">
+                <input class="un" placeholder="Username" asp-for="UserName" />
+                <span asp-validation-for="UserName" class="validation"></span>
+            </div>
+            <div class="input-div">
+                <input class="pass" asp-for="Password" placeholder="Password" />
+                <span asp-validation-for="Password" class="validation"></span>
+            </div>
+            <div class="input-div">
+                <input asp-for="PasswordConfirm" class="pass" placeholder="Confirmed password" />
+                <span asp-validation-for="PasswordConfirm" class="validation"></span>
+            </div>
+            <div>
+                <input class="submit" style="margin-top:0px; margin-bottom:10px;" type="submit" value="Register" />
+            </div>
+        </form>
+    </div>
+
+</body>
+
+</html>

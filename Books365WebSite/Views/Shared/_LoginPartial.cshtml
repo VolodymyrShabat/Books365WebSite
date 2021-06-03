@@ -1,0 +1,28 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Books365WebSite.Models
+
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+
+<ul class="navbar-nav">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <li class="navitem">
+            <a id="manage" class="nav-link text-dark" style="color:#D8BFD8!important;" asp-controller="Account" asp-action="Edit" asp-route-id="@UserManager.GetUserId(User)" title="Manage">@UserManager.GetUserName(User)</a>
+        </li>
+        <li class="navitem">
+            <form id="logoutForm" asp-action="Logout" asp-controller="Account" asp-route-returnUrl="@Url.Action("Account", "Login", new { area = "" })" style="vertical-align:central; text-align:center;">
+                <button style="color:#D8BFD8!important;" id="logout" type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="navitem">
+            <a class="nav-link text-dark" id="register" style="color:#D8BFD8!important;" asp-action="Register" asp-controller="Account">Register</a>
+        </li>
+        <li class="navitem">
+            <a class="nav-link text-dark" id="login" style="color:#D8BFD8!important;" asp-action="Login" asp-controller="Account">Login</a>
+        </li>
+    }
+</ul>

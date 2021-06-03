@@ -1,0 +1,50 @@
+﻿@using Books365WebSite.Models;
+@model Statistic
+
+<div class="jumbotron col-12 mt-5 mb-5 p-5 border" style="background-image: url('/table.jpg'); background-size: cover">
+    <div class="row">
+        <h3 class="text-info">Book Library</h3>
+    </div>
+    <hr class="mb-5" />
+    <table id="dataTable2" class="table table-bordered bg-white table-hover table-striped" style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>Isbn</th>
+                <th>Title</th>
+                <th>Genre</th>
+                <th>Pages</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th>PagesRead</th>
+                <th>DateStarted</th>
+                <th></th>
+            </tr>
+        </thead>
+    </table>
+    <table class="table table-bordered bg-white table-hover table-striped" style="width:100%">
+        <thead class="thead-dark">
+            <tr>
+                <th>AmountOfUserBooks</th>
+                <th>BooksInProgress</th>
+                <th>BooksRead</th>
+                <th>FavouriteAuthor</th>
+                <th>FirstBook</th>
+                <th>PagesRead</th>
+            </tr>
+        </thead>
+
+    <tr>
+        <th>@Model.AmountOfUserBooks</th>
+        <th>@Model.BooksInProgress</th>
+        <th>@Model.BooksRead</th>
+        <th>@Model.FavouriteAuthor</th>
+        <th>@Model.FirstBook</th>
+        <th>@Model.PagesRead</th>
+    </tr>
+	}
+    </table>
+</div>
+
+@section Scripts{
+    <script src="~/js/userLibrary.js"></script>
+}

@@ -1,0 +1,26 @@
+﻿@using Books365WebSite.Models;
+@model IEnumerable<Book>
+
+<div class="jumbotron col-12 mt-5 mb-5 p-5 border" style="background-image: url('/table.jpg'); background-size: cover">
+    <div class="row">
+        <h3 class="text-info">Book Library</h3>
+        <a href="/Home/Create" class="tableButton btn btn-info text-white ml-auto mr-3" style="cursor:pointer; width:200px;">Create +</a>
+    </div>
+      <hr class="mb-5" />
+        <table id="dataTable" class="table table-bordered bg-white table-hover table-striped" style="width:100%">
+            <thead class="thead-dark">
+                <tr>
+                    <th>Isbn</th>
+                    <th>Title</th>
+                    <th>Genre</th>
+                    <th>Pages</th>
+                    <th>Author</th>
+                    <th></th>
+                </tr>
+            </thead>
+        </table>
+</div>
+
+@section Scripts{
+    <script src="~/js/bookslibrary.js"></script>
+}
