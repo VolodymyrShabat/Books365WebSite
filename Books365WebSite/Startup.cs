@@ -1,4 +1,6 @@
 
+using Books365WebSite.Infrustructure;
+using Books365WebSite.Interfaces;
 using Books365WebSite.Models;
 using Books365WebSite.Services;
 using Microsoft.AspNetCore.Builder;
@@ -27,6 +29,8 @@ namespace Books365WebSite
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+
+           
             services.AddControllersWithViews();
             services.AddDbContext<Context>(options => options.UseSqlServer(Configuration.GetConnectionString("DbContextConnection")));
             services.AddIdentity<User, IdentityRole>(options =>
@@ -38,6 +42,8 @@ namespace Books365WebSite
                 options.SignIn.RequireConfirmedAccount = true;
             }
                 ).AddEntityFrameworkStores<Context>().AddDefaultTokenProviders();
+            services.AddScoped<IRepository, Repository>();
+
             //services.AddAuthentication().AddGoogle().AddFacebook();
         }
 

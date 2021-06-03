@@ -1,12 +1,15 @@
 using Books365WebSite.Controllers;
+using Books365WebSite.Infrustructure;
 using Books365WebSite.Models;
 using Books365WebSite.ViewModels;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
 using System.Linq;
+using System.Security.Claims;
 using Xunit;
 
 namespace Books365Website.Tests
@@ -30,7 +33,7 @@ namespace Books365Website.Tests
             var context = _serviceProvider.GetService<Context>();
 
             //Act
-            HomeController controller = new HomeController(_userManager, context);
+            HomeController controller = new HomeController(new Repository( context, _userManager));
             ViewResult result = controller.Index() as ViewResult;
 
             //Assert
@@ -38,14 +41,14 @@ namespace Books365Website.Tests
         }
 
         [Fact]
-        public async void GetBooksHomeControllerTest()
+        public void GetBooksHomeControllerTest()
         {
             //Arrange
             var context = _serviceProvider.GetService<Context>();
 
             //Act
-            HomeController controller = new HomeController(_userManager, context);
-            ViewResult result = await controller.GetBooks() as ViewResult;
+            HomeController controller = new HomeController(new Repository(context, _userManager));
+            ViewResult result = controller.GetBooks() as ViewResult;
 
             //Assert
             Assert.NotNull(result);
@@ -58,7 +61,7 @@ namespace Books365Website.Tests
             var context = _serviceProvider.GetService<Context>();
 
             //Act
-            HomeController controller = new HomeController(_userManager, context);
+            HomeController controller = new HomeController(new Repository(context, _userManager));
             ViewResult result = controller.Index() as ViewResult;
             
             
@@ -84,13 +87,20 @@ namespace Books365Website.Tests
             await context.SaveChangesAsync();
 
             //Act
-            HomeController controller = new HomeController(_userManager, context);
-
+            HomeController controller = new HomeController(new Repository(context, _userManager));
+            controller.ControllerContext = new ControllerContext();
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(ClaimTypes.Name, "example name"),
+                    new Claim(ClaimTypes.PrimarySid, "1"),
+                    new Claim("custom-claim", "example claim value"),
+                }, "mock"));
+            controller.ControllerContext.HttpContext = new DefaultHttpContext() { User = user };
             ViewResult result = await controller.Upsert(fakeBook.Isbn) as ViewResult;
             CreatingViewModel model = (CreatingViewModel)result.Model;
 
             context.Remove(fakeBook);
-            await context.SaveChangesAsync();
+            context.SaveChanges();
 
             //Assert
             Assert.NotNull(result);
@@ -98,6 +108,8 @@ namespace Books365Website.Tests
             Assert.Equal(model.Book.Title, fakeBook.Title);
             Assert.Equal(model.Book.Genre, fakeBook.Genre);
             Assert.Null(model.Status);
+            Assert.IsType<CreatingViewModel>(model);
+
         }
     }
 }

@@ -1,11 +1,11 @@
-﻿
+﻿using Books365WebSite.Infrustructure;
+using Books365WebSite.Interfaces;
 using Books365WebSite.Models;
 using Books365WebSite.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,57 +18,29 @@ namespace Books365WebSite.Controllers
     public class HomeController : Controller
     {
 
-        private Context _db;
-        private UserManager<User> _userManager;
+        private readonly IRepository _repository;
 
-        public HomeController(UserManager<User> userManager, Context db)
+        public HomeController(IRepository repository)
         {
-            _db = db;
-            _userManager = userManager;
+            _repository = repository;
         }
 
-        public IActionResult Index()
-        {
-            return View();
-        }
+        [BindProperty]
+        public Book Book { get; set; }
+
+        public IActionResult Index() => View();
 
         [Authorize]
-        public async Task<IActionResult> GetBooks() => View(await _db.Books.ToListAsync());
-        
+        public IActionResult GetBooks() => View();
 
         [HttpGet]
-        public async Task<IActionResult> Books() => Json(new { data = await _db.Books.ToListAsync() });
-
-
-
-
+        public async Task<IActionResult> Books() => Json(new { data = await _repository.GetAllBooks() });
 
         [HttpGet]
         [Authorize]
         public async Task<IActionResult> GetUserBooks()
         {
-            var currentUser = await GetCurrentUserAsync();
-
-            var userId = currentUser?.Id;
-
-            var statusesOfUser = _db.ReadingStatuses.Where(x => x.UserId == userId);
-
-            var books = _db.Books.Where(x => statusesOfUser.Any(b => x.Isbn == b.BookId)).ToList();
-
-            var result = from book in books
-                         join statuses in statusesOfUser on book.Isbn equals statuses.BookId
-                         select new { Isbn = book.Isbn, Read = statuses.PagesRead, Date = statuses.DateStarted, Author = book.Author, Title = book.Title, Pages = book.Pages, Genre = book.Genre, Status = statuses.Status };
-
-
-            List<ReadingStatusViewModel> data = new();
-            foreach (var item in result)
-            {
-                Book book = new() { Isbn = item.Isbn, Genre = item.Genre, Author = item.Author, Pages = item.Pages, Title = item.Title };
-                ReadingStatus statuses = new() { BookId = item.Isbn, Status = item.Status,PagesRead=item.Read,DateStarted=item.Date};
-
-                data.Add(new() { Book = book, Status = statuses});
-            } 
-
+            var data = await _repository.GetUserBooks(HttpContext.User);
             return Json(new { data = data });
         }
 
@@ -76,17 +48,11 @@ namespace Books365WebSite.Controllers
         [Authorize]
         public async Task<IActionResult> UserBooks()
         {
-            var currentUser = await GetCurrentUserAsync();
-
-            var userId = currentUser?.Id;
-            Statistic statistic = new Statistic(userId);
+            var statistic = await _repository.GetStatistic(HttpContext.User);
             return View(statistic);
+
         }
 
-        private Task<User> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
-
-        [BindProperty]
-        public Book Book { get; set; }
 
         [Authorize]
         public async Task<IActionResult> Upsert(int? id)
@@ -94,8 +60,8 @@ namespace Books365WebSite.Controllers
             CreatingViewModel model = new();
             if (id is null) return View(model);
 
-            var book = await _db.Books.FindAsync(id);
-            var status = await _db.ReadingStatuses.FirstOrDefaultAsync(u => u.BookId == id);
+            var book = await _repository.GetBookById(id);
+            var status = await _repository.GetBookReadingStatus(id, HttpContext.User);
             model.Book = book;
             model.Status = status;
             return View(model);
@@ -103,37 +69,33 @@ namespace Books365WebSite.Controllers
 
         [Authorize]
         [HttpGet]
-        public async Task<IActionResult> Create() => View(new Book());
-        
+        public async Task<IActionResult> Create() =>  View(new Book());
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateBook(Book book)
         {
             if (ModelState.IsValid)
             {
-                _ = await _db.Books.FindAsync(book.Isbn);
-                await _db.AddAsync(book);
-               
-
-                await _db.SaveChangesAsync();
+                Book bookfromDB = await _repository.GetBookById(book.Isbn);
+                await _repository.AddBook(book);
             }
+
             return Redirect("/Home/GetBooks");
         }
 
         [Authorize]
         public async Task<IActionResult> AddStatus(int id)
         {
-            var currentUser = await GetCurrentUserAsync();
-
-            var userId = currentUser?.Id;
+            var currentUser = _repository.GetCurrentUserAsync(HttpContext.User);
+            var userId = currentUser?.Result.Id;
             ReadingStatus status = new ReadingStatus()
-            { BookId = id,UserId= userId, Status = "In progress",DateStarted=DateTime.Now};
-            var statusFromDb = await _db.ReadingStatuses.FirstOrDefaultAsync(u => u.BookId == id && u.UserId==userId);
-            if (statusFromDb==null)
-            {
-                await _db.ReadingStatuses.AddAsync(status);
-                await _db.SaveChangesAsync();
-            }
+            { BookId = id, UserId = userId.ToString(), Status = "In progress", DateStarted = DateTime.Now };
+
+            var statusFromDb = await _repository.GetBookReadingStatus(id, HttpContext.User);
+            if (statusFromDb == null)
+                await _repository.AddReadingStatus(status);
+
 
             return Redirect("/Home/GetBooks");
 
@@ -145,34 +107,14 @@ namespace Books365WebSite.Controllers
         public async Task<IActionResult> Update(CreatingViewModel model)
         {
             if (ModelState.IsValid)
-            {
-                var currentUser = await GetCurrentUserAsync();
+                await _repository.UpdateReadingStatus(model, HttpContext.User);
 
-                var userId = currentUser?.Id;
-                Book bookfromDB = await _db.Books.FindAsync(model.Book.Isbn);
-                ReadingStatus status = await _db.ReadingStatuses.FirstOrDefaultAsync(u => u.BookId == model.Book.Isbn && u.UserId==userId);
-                if (bookfromDB is null)
-                    await _db.AddAsync(model.Book);
-                else 
-                {
-                    status.PagesRead = model.Status.PagesRead;
-                    status.Status = model.Status.Status;
-                }
-
-                await _db.SaveChangesAsync();
-            }
             return Redirect("/Home/UserBooks");
         }
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
         {
-            var currentUser = await GetCurrentUserAsync();
-
-            var userId = currentUser?.Id;
-            var readingStatus = await _db.ReadingStatuses.Where(u => u.BookId == id && u.UserId== userId).FirstOrDefaultAsync();
-            _db.ReadingStatuses.Remove(readingStatus);
-            await _db.SaveChangesAsync();
-
+            await _repository.DeleteReadingStatus(id, HttpContext.User);
             return Json(new { success = true, msg = "Deleted successfully" });
         }
 
@@ -183,5 +125,5 @@ namespace Books365WebSite.Controllers
         }
     }
 
-   
+
 }
