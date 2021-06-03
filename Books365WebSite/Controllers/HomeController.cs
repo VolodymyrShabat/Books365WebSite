@@ -50,6 +50,7 @@ namespace Books365WebSite.Controllers
             var currentUser = await GetCurrentUserAsync();
 
             var userId = currentUser?.Id;
+
             var statusesOfUser = _db.ReadingStatuses.Where(x => x.UserId == userId);
 
             var books = _db.Books.Where(x => statusesOfUser.Any(b => x.Isbn == b.BookId)).ToList();
