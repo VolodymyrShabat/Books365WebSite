@@ -33,7 +33,7 @@ namespace Books365WebSite.Controllers
         }
 
         [Authorize]
-        public async Task<IActionResult> GetBooks() => View(/*await _db.Books.ToListAsync()*/);
+        public async Task<IActionResult> GetBooks() => View(await _db.Books.ToListAsync());
         
 
         [HttpGet]
@@ -79,38 +79,8 @@ namespace Books365WebSite.Controllers
             var currentUser = await GetCurrentUserAsync();
 
             var userId = currentUser?.Id;
-            var booksIdOfCurrentUser = _db.ReadingStatuses.Where(x => x.UserId == userId);
-
-            var pagesReadOfCurrentUserList = _db.ReadingStatuses.Where(x => x.UserId == userId);
-            var allReadPages = pagesReadOfCurrentUserList.Sum(x => x.PagesRead);
-
-            var booksOfCurrentUser = _db.Books.Where(x => booksIdOfCurrentUser.Any(b => x.Isbn == b.BookId)).ToList();
-            var booksReadOfCurrentUser = _db.Books.Where(x => booksIdOfCurrentUser.Any(b => x.Isbn == b.BookId && b.Status == "Read")).ToList();
-
-            var booksInProgressOfCurrentUser = _db.Books.Where(x => booksIdOfCurrentUser.Any(b => x.Isbn == b.BookId && b.Status == "In progress")).ToList();
-
-            var favouriteAuthor = booksOfCurrentUser.GroupBy(s => s.Author)
-                         .OrderByDescending(s => s.Count()).FirstOrDefault();
-            string favouriteAuthorString = string.Empty;
-            if (favouriteAuthor != null)
-            {
-                favouriteAuthorString  = favouriteAuthor.Key;
-            }
-            var firstBookId = _db.ReadingStatuses.Where(x => x.UserId == userId).OrderBy(x => x.DateStarted).Select(x => x.BookId).FirstOrDefault();
-
-            var firstBook = _db.Books.Where(x => x.Isbn == firstBookId).Select(x => x.Title).FirstOrDefault();
-
-
-
-            Statistic statistic = new Statistic();
-            statistic.AmountOfUserBooks = booksOfCurrentUser.Count;
-            statistic.BooksRead = booksReadOfCurrentUser.Count;
-            statistic.BooksInProgress = booksInProgressOfCurrentUser.Count;
-            statistic.PagesRead = allReadPages;
-            statistic.FavouriteAuthor = favouriteAuthorString;
-            statistic.FirstBook = firstBook;
+            Statistic statistic = new Statistic(userId);
             return View(statistic);
-
         }
 
         private Task<User> GetCurrentUserAsync() => _userManager.GetUserAsync(HttpContext.User);
