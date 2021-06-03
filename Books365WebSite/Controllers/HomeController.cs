@@ -31,7 +31,7 @@ namespace Books365WebSite.Controllers
         public IActionResult Index() => View();
 
         [Authorize]
-        public IActionResult GetBooks() => View();
+        public IActionResult Library() => View();
 
         [HttpGet]
         public async Task<IActionResult> Books() => Json(new { data = await _repository.GetAllBooks() });
@@ -46,7 +46,7 @@ namespace Books365WebSite.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task<IActionResult> UserBooks()
+        public async Task<IActionResult> UserPage()
         {
             var statistic = await _repository.GetStatistic(HttpContext.User);
             return View(statistic);
@@ -73,15 +73,14 @@ namespace Books365WebSite.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UpdateBook(Book book)
+        public async Task<IActionResult> AddBook(Book book)
         {
             if (ModelState.IsValid)
             {
-                Book bookfromDB = await _repository.GetBookById(book.Isbn);
                 await _repository.AddBook(book);
             }
 
-            return Redirect("/Home/GetBooks");
+            return Redirect("/Home/Library");
         }
 
         [Authorize]
@@ -97,7 +96,7 @@ namespace Books365WebSite.Controllers
                 await _repository.AddReadingStatus(status);
 
 
-            return Redirect("/Home/GetBooks");
+            return Redirect("/Home/Library");
 
         }
 
@@ -109,7 +108,7 @@ namespace Books365WebSite.Controllers
             if (ModelState.IsValid)
                 await _repository.UpdateReadingStatus(model, HttpContext.User);
 
-            return Redirect("/Home/UserBooks");
+            return Redirect("/Home/UserPage");
         }
         [HttpDelete]
         public async Task<IActionResult> Delete(int id)
