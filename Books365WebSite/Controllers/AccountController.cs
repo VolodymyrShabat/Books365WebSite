@@ -15,14 +15,10 @@ public class AccountController : Controller
 {
     private readonly UserManager<User> _UserManager;
     private readonly SignInManager<User> _SignInManager;
-    private readonly RoleManager<IdentityRole> _RoleManager;
-    private Context _db;
-    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, Context db)
+    public AccountController(UserManager<User> userManager, SignInManager<User> signInManager)
     {
         _UserManager = userManager;
         _SignInManager = signInManager;
-        _db = db;
-        _RoleManager = roleManager;
     }
     [HttpGet]
     public IActionResult Register()
