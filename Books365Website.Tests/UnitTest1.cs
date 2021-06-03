@@ -48,14 +48,14 @@ namespace Books365Website.Tests
 
             //Act
             HomeController controller = new HomeController(new Repository(context, _userManager));
-            ViewResult result = controller.GetBooks() as ViewResult;
+            ViewResult result = controller.Library() as ViewResult;
 
             //Assert
             Assert.NotNull(result);
         }
 
         [Fact]
-        public  void GetUserBooksHomeControllerTest()
+        public void GetUserBooksHomeControllerTest()
         {
             //Arrange
             var context = _serviceProvider.GetService<Context>();
