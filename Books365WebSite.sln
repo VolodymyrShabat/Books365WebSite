@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Books365WebSite", "Books365WebSite\Books365WebSite.csproj", "{380EC100-699B-490D-AE4D-86367F947DC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Books365Website.Tests", "Books365Website.Tests\Books365Website.Tests.csproj", "{207ABBC5-3B77-43FF-83F9-50EEB1A11D3F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Books365Website.Tests", "Books365Website.Tests\Books365Website.Tests.csproj", "{207ABBC5-3B77-43FF-83F9-50EEB1A11D3F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
