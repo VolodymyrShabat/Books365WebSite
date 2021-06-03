@@ -140,7 +140,7 @@ namespace Books365WebSite.Controllers
         {
             if (ModelState.IsValid)
             {
-                Book bookfromDB = await _db.Books.FindAsync(book.Isbn);
+                _ = await _db.Books.FindAsync(book.Isbn);
                 await _db.AddAsync(book);
                
 
@@ -157,7 +157,6 @@ namespace Books365WebSite.Controllers
             var userId = currentUser?.Id;
             ReadingStatus status = new ReadingStatus()
             { BookId = id,UserId= userId, Status = "In progress",DateStarted=DateTime.Now};
-            var k = status;
             var statusFromDb = await _db.ReadingStatuses.FirstOrDefaultAsync(u => u.BookId == id && u.UserId==userId);
             if (statusFromDb==null)
             {
@@ -176,15 +175,17 @@ namespace Books365WebSite.Controllers
         {
             if (ModelState.IsValid)
             {
+                var currentUser = await GetCurrentUserAsync();
+
+                var userId = currentUser?.Id;
                 Book bookfromDB = await _db.Books.FindAsync(model.Book.Isbn);
-                ReadingStatus status = await _db.ReadingStatuses.FirstOrDefaultAsync(u => u.BookId == model.Book.Isbn);
+                ReadingStatus status = await _db.ReadingStatuses.FirstOrDefaultAsync(u => u.BookId == model.Book.Isbn && u.UserId==userId);
                 if (bookfromDB is null)
                     await _db.AddAsync(model.Book);
                 else 
                 {
                     status.PagesRead = model.Status.PagesRead;
                     status.Status = model.Status.Status;
-
                 }
 
                 await _db.SaveChangesAsync();
